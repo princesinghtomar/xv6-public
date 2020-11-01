@@ -32,7 +32,35 @@ struct context {
   uint eip;
 };
 
+
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+
+//  MLFQ variable/functions --------------------------------------------------------
+
+
+#define MAX_PROC_COUNT (int)9000
+// after 10 ticks, process priority is going to increase
+
+// this priority queue holds all runnable process
+// it is changed every time scheduler runs
+int prioQStart[size_of_the_queue];
+int total_size_of_queues[size_of_the_queue];
+void delete_func(int qinx_p, int idx);
+void push(int qinx_p, struct proc *p);
+void dec_priority_func(struct proc *queueinx_p, int retain);
+int get_queue_inx(struct proc *currp);
+void updateRuntime();
+int check_proc(struct proc *p);
+int preemption_func(int prio, int checkSamePrio);
+int back_index(int qinx_p);
+void updating_func();
+struct proc *popFront(int qinx_p);
+struct proc *getFront(int qinx_p);
+int get_ticks_func(struct proc *currp);
+void inc_priority_func(struct proc *queueinx_p);
+struct proc *storing_queue[size_of_the_queue][MAX_PROC_COUNT];
+
+// end --------------------------------------------------------- 
 
 // Per-process state
 struct proc {
@@ -49,10 +77,23 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+// # ---------------------------------------------------------------- #
+  int ticks[5];                // to store the ticks of the process recieved in each queue
+  int latestQTime;             // storage of ticks if needed by chance
+  int ps_stime;                // ps_time here
+  int ps_etime;                // ps_etime here
+  int ps_iotime;
+  int ps_rtime;                // ps_rtime here
+  int etime;                   // End time
+  int stime;                   // Start time
+  int num_run;                 // number of time process is being executed
+  int queue_pos;               // position in  the queue
+  int queue_num;               // number of the queue currently present
+  int rtime;                   // Runnig time
+  int iotime;                  // Input/Output time  
+  int priority;                // Priority of the process
+  int iotime1;                 // Input/Output time
+  int iotime2;                 // Input/Output time
+// # ----------------------------------------------------------------- #
 };
 
-// Process memory is laid out contiguously, low addresses first:
-//   text
-//   original data and bss
-//   fixed-size stack
-//   expandable heap
