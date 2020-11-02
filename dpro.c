@@ -4,6 +4,7 @@
 
 int main()
 {
+
     volatile float a = 0, b = 1.43, c = 1.35;
 
     for (volatile int i = 0; i < 10000000; i++)

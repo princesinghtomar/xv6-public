@@ -89,7 +89,7 @@ void initProcMyStyle(struct proc *p)
 
 #endif
   p->etime = -1;
-  p->ps_etime  =-1;
+  p->ps_etime = -1;
   p->rtime = 0;
   p->ps_rtime = 0;
   p->ps_iotime = 0;
@@ -588,7 +588,7 @@ void scheduler(void)
       {
         selected_one->state = RUNNING;
       }
-      selected_one->num_run+=1;
+      selected_one->num_run += 1;
       swtch(&(c->scheduler), selected_one->context);
       switchkvm();
       c->proc = 0;
@@ -632,13 +632,19 @@ void scheduler(void)
             highP = p1;
         }
       }
+      if (!pass)
+      {
+        panic("Problem in pass");
+      }
       tempP = highP;
       int storeP = tempP->priority;
       //p = highP;
       c->proc = tempP;
       switchuvm(tempP);
-      tempP->state = RUNNING;
-      tempP->num_run+=1;
+      if(!(tempP->state==RUNNING)){
+        tempP->state = RUNNING;
+      }
+      tempP->num_run += 1;
 
       swtch(&(c->scheduler), tempP->context);
       switchkvm();
@@ -679,7 +685,7 @@ void scheduler(void)
   for (;;)
   {
     sti();
-    struct proc *alottedP = 0;
+    struct proc *selected_proc = 0;
     acquire(&ptable.lock);
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     {
@@ -706,7 +712,7 @@ void scheduler(void)
 
         if (!check_proc(p)) // check whether process is alive or not
         {
-          alottedP = p;
+          selected_proc = p;
           break;
         }
         else // if dead pop it from queue
@@ -716,7 +722,7 @@ void scheduler(void)
         }
       }
 
-      if (!alottedP)
+      if (!selected_proc)
       { // if not alotted then continue
         continue;
       }
@@ -725,40 +731,44 @@ void scheduler(void)
         break;
       }
     }
-    if (alottedP)
+    if (selected_proc)
     {
+      if (!pass)
+      {
+        panic("Problem in pass");
+      }
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      c->proc = alottedP;
-      switchuvm(alottedP);
+      c->proc = selected_proc;
+      switchuvm(selected_proc);
 
       // removing running process from queue
-      popFront(get_queue_inx(alottedP));
-      alottedP->latestQTime = ticks;
-      alottedP->num_run += 1;
-      if (!(alottedP->state == RUNNING))
+      popFront(get_queue_inx(selected_proc));
+      selected_proc->latestQTime = ticks;
+      selected_proc->num_run += 1;
+      if (!(selected_proc->state == RUNNING))
       {
-        alottedP->state = RUNNING;
+        selected_proc->state = RUNNING;
       }
 
-      swtch(&(c->scheduler), alottedP->context);
+      swtch(&(c->scheduler), selected_proc->context);
 
       // technically it should be pushing at the back of the same
       // queue if it had not yield
       // if process went to sleep or was not able to complete its full
       // time slice, push it to end of same queue
-      int val_variable1 = ticks - alottedP->latestQTime;
+      int val_variable1 = ticks - selected_proc->latestQTime;
       int procTcks = val_variable1;
-      int queueinx_p = get_queue_inx(alottedP);
-      int var_flag1 = alottedP->state == RUNNABLE && procTcks > 0;
-      if ((alottedP->state == SLEEPING) || ((procTcks < (1 << queueinx_p)) && var_flag1))
+      int queueinx_p = get_queue_inx(selected_proc);
+      int var_flag1 = selected_proc->state == RUNNABLE && procTcks > 0;
+      if ((selected_proc->state == SLEEPING) || ((procTcks < (1 << queueinx_p)) && var_flag1))
       {
-        dec_priority_func(alottedP, 1);
+        dec_priority_func(selected_proc, 1);
       }
-      else if ((procTcks == (1 << queueinx_p)) && alottedP->state == RUNNABLE)
+      else if ((procTcks == (1 << queueinx_p)) && selected_proc->state == RUNNABLE)
       {
-        dec_priority_func(alottedP, 0);
+        dec_priority_func(selected_proc, 0);
       }
 
       switchkvm();
@@ -963,6 +973,10 @@ void procdump(void)
 
 int increment_p_func(struct proc *p)
 {
+  if (!p)
+  {
+    return 0;
+  }
   int tcks = get_ticks_func(p);
   int qinx_p = get_queue_inx(p);
   tcks += 1;
@@ -980,6 +994,7 @@ int increment_p_func(struct proc *p)
   }
   return 0;
 }
+
 
 void updating_func()
 {
@@ -1033,7 +1048,7 @@ int popFront2(int qinx_p)
   }
   else
   {
-    if (prioQStart[qinx_p] != 0)
+    if (!(prioQStart[qinx_p] == 0))
     {
       prioQStart[qinx_p] = 0;
     }
@@ -1084,9 +1099,12 @@ int back_index(int qinx_p)
   }
 }
 
-int push1(struct proc *p,int qinx_p){
-  if(p);
-  else{
+int push1(struct proc *p, int qinx_p)
+{
+  if (p)
+    ;
+  else
+  {
     panic("NULL proc !!");
     return 0;
   }
@@ -1094,18 +1112,22 @@ int push1(struct proc *p,int qinx_p){
   p->queue_num = qinx_p,
   p->queue_pos = bi,
   storing_queue[qinx_p][p->queue_pos] = p;
-  total_size_of_queues[qinx_p] +=1;
+  total_size_of_queues[qinx_p] += 1;
   return 1;
 }
 void push(int qinx_p, struct proc *p)
 {
-  if (p);
+  int i;
+  if (p)
+  {
+    ;
+  }
   else
   {
     panic("the proc passed is empty hence failed to push");
   }
 
-  for (int i = prioQStart[qinx_p]; i != back_index(qinx_p);i++, i = i % MAX_PROC_COUNT)
+  for (i = prioQStart[qinx_p]; i != back_index(qinx_p); i++, i = i % MAX_PROC_COUNT)
   {
     if (storing_queue[qinx_p][i]->pid == p->pid)
     {
@@ -1115,27 +1137,16 @@ void push(int qinx_p, struct proc *p)
       }
     }
   }
-  int val = push1(p,qinx_p);
-  if(val == 0){
+  int val = push1(p, qinx_p);
+  if (val == 0)
+  {
     panic("Problem in passing argument");
   }
 }
 
-void delete_func(int qinx_p, int idx)
+int getQPos(struct proc *currp)
 {
-  if (storing_queue[qinx_p][idx] == 0)
-  {
-    panic("Some deleted index found");
-  }
-  storing_queue[qinx_p][idx] = 0;
-  total_size_of_queues[qinx_p] = total_size_of_queues[qinx_p] - 1;
-  int bi = back_index(qinx_p),i;
-  for (i = idx; !(i == bi); i++, i = i % MAX_PROC_COUNT)
-  {
-    int val_temp = (i+1)%MAX_PROC_COUNT;
-    storing_queue[qinx_p][i] = storing_queue[qinx_p][val_temp],
-    storing_queue[qinx_p][i]->queue_pos = i;
-  }
+  return currp->queue_pos;
 }
 
 int get_ticks_func(struct proc *currp)
@@ -1149,9 +1160,22 @@ int get_ticks_func(struct proc *currp)
   int val_ret = tck - temp_val;
   return val_ret;
 }
-int getQPos(struct proc *currp)
+
+void delete_func(int qinx_p, int idx)
 {
-  return currp->queue_pos;
+  if (storing_queue[qinx_p][idx] == 0)
+  {
+    panic("Some deleted index found");
+  }
+  storing_queue[qinx_p][idx] = 0;
+  total_size_of_queues[qinx_p] = total_size_of_queues[qinx_p] - 1;
+  int bi = back_index(qinx_p), i;
+  for (i = idx; !(i == bi); i++, i = i % MAX_PROC_COUNT)
+  {
+    int val_temp = (i + 1) % MAX_PROC_COUNT;
+    storing_queue[qinx_p][i] = storing_queue[qinx_p][val_temp],
+    storing_queue[qinx_p][i]->queue_pos = i;
+  }
 }
 int get_queue_inx(struct proc *currp)
 {
@@ -1165,6 +1189,56 @@ int get_queue_inx(struct proc *currp)
   return val_ret;
 }
 
+
+void dec_priority_func(struct proc *currp, int retain)
+{
+  int queueinx_p = get_queue_inx(currp);
+  if (queueinx_p < 0)
+    panic("Problem in queueinx in incp func");
+
+  if (currp)
+    ; //check for the currp whether its NULL or not
+  else
+    panic("currp can't be zero in inc_p function");
+
+  currp->latestQTime = ticks;
+  int dest = queueinx_p;
+
+  if (queueinx_p == size_of_the_queue - 1 || retain)
+  {
+    push(queueinx_p, currp);
+  }
+  else
+  {
+    currp->ps_stime = ticks;
+    currp->ps_rtime = 0;
+    queueinx_p += 1;
+    currp->ps_etime = ticks;
+    if (queueinx_p == 0)
+    {
+      currp->priority = 15;
+    }
+    else if (queueinx_p == 1)
+    {
+      currp->priority = 35;
+    }
+    else if (queueinx_p == 2)
+    {
+      currp->priority = 55;
+    }
+    else if (queueinx_p == 3)
+    {
+      currp->priority = 75;
+    }
+    else if (queueinx_p == 4)
+    {
+      currp->priority = 95;
+    }
+    push(queueinx_p, currp);
+    dest = dest + 1;
+  }
+}
+
 void inc_priority_func(struct proc *currp)
 {
   int queueinx_p = get_queue_inx(currp);
@@ -1176,7 +1250,8 @@ void inc_priority_func(struct proc *currp)
   }
   delete_func(queueinx_p, qPos);
 
-  if (currp);
+  if (currp)
+    ;
   else
   {
     panic("currp can't be zero in inc_p function");
@@ -1195,67 +1270,30 @@ void inc_priority_func(struct proc *currp)
     currp->ps_rtime = 0;
     currp->ps_iotime = 0;
     currp->ps_etime = ticks;
-    if(queueinx_p == 0){
+    if (queueinx_p == 0)
+    {
       currp->priority = 15;
     }
-    else if(queueinx_p == 1){
+    else if (queueinx_p == 1)
+    {
       currp->priority = 35;
     }
-    else if(queueinx_p == 2){
+    else if (queueinx_p == 2)
+    {
       currp->priority = 55;
     }
-    else if(queueinx_p == 3){
+    else if (queueinx_p == 3)
+    {
       currp->priority = 75;
     }
-    else if(queueinx_p == 4){
+    else if (queueinx_p == 4)
+    {
       currp->priority = 95;
     }
     push(queueinx_p, currp);
   }
 }
 
-void dec_priority_func(struct proc *currp, int retain)
-{
-  int queueinx_p = get_queue_inx(currp);
-  if (queueinx_p < 0)
-    panic("Problem in queueinx in incp func");
-
-  if (currp); //check for the currp whether its NULL or not
-  else
-    panic("currp can't be zero in inc_p function");
-
-  currp->latestQTime = ticks;
-  int dest = queueinx_p;
-
-  if (queueinx_p == size_of_the_queue - 1 || retain)
-  {
-    push(queueinx_p, currp);
-  }
-  else
-  {
-    currp->ps_stime = ticks;
-    currp->ps_rtime = 0;
-    queueinx_p +=1;
-    currp->ps_etime = ticks;
-    if(queueinx_p == 0){
-      currp->priority = 15;
-    }
-    else if(queueinx_p == 1){
-      currp->priority = 35;
-    }
-    else if(queueinx_p == 2){
-      currp->priority = 55;
-    }
-    else if(queueinx_p == 3){
-      currp->priority = 75;
-    }
-    else if(queueinx_p == 4){
-      currp->priority = 95;
-    }
-    push(queueinx_p, currp);
-    dest = dest + 1;
-  }
-}
 #endif
 
 int ps()
@@ -1272,44 +1310,45 @@ int ps()
   {
     int rtime;
     int wtime;
-    wtime = p->etime - p->ps_stime - p->ps_rtime - p->ps_iotime ;
+    wtime = p->etime - p->ps_stime - p->ps_rtime - p->ps_iotime;
     rtime = p->rtime;
     if (p->state != ZOMBIE)
     {
       wtime = ticks - p->ps_stime - p->ps_rtime - p->iotime;
     }
-    if (wtime < 0){
+    if (wtime < 0)
+    {
       wtime = 0;
     }
     if (p->state == SLEEPING)
     {
       cprintf("%d \t SLEEPING \t %d \t\t %d \t\t %d \t\t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %s \n ",
               p->pid, p->priority, rtime, wtime, p->num_run, p->queue_num, p->ticks[0],
-              p->ticks[1], p->ticks[2], p->ticks[3], p->ticks[4],p->name);
+              p->ticks[1], p->ticks[2], p->ticks[3], p->ticks[4], p->name);
     }
     else if (p->state == RUNNING)
     {
       cprintf("%d \t RUNNING \t %d \t\t %d \t\t %d \t\t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %s \n ",
               p->pid, p->priority, rtime, wtime, p->num_run, p->queue_num, p->ticks[0],
-              p->ticks[1], p->ticks[2], p->ticks[3], p->ticks[4],p->name);
+              p->ticks[1], p->ticks[2], p->ticks[3], p->ticks[4], p->name);
     }
     else if (p->state == ZOMBIE)
     {
       cprintf("%d \t ZOMBIE \t %d \t\t %d \t\t %d \t\t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %s \n ",
               p->pid, p->priority, rtime, wtime, p->num_run, p->queue_num, p->ticks[0],
-              p->ticks[1], p->ticks[2], p->ticks[3], p->ticks[4],p->name);
+              p->ticks[1], p->ticks[2], p->ticks[3], p->ticks[4], p->name);
     }
     else if (p->state == RUNNABLE)
     {
       cprintf("%d \t RUNNABLE \t %d \t\t %d \t\t %d \t\t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %s \n ",
               p->pid, p->priority, rtime, wtime, p->num_run, p->queue_num, p->ticks[0],
-              p->ticks[1], p->ticks[2], p->ticks[3], p->ticks[4],p->name);
+              p->ticks[1], p->ticks[2], p->ticks[3], p->ticks[4], p->name);
     }
     else if (p->state == EMBRYO)
     {
       cprintf("%d \t EMBRYO \t \t %d \t %d \t %d \t %d \t %d \t %d \t %d \t %s\n ",
               p->pid, p->priority, rtime, wtime, p->num_run, p->queue_num, p->ticks[0],
-              p->ticks[1], p->ticks[2], p->ticks[3], p->ticks[4],p->name);
+              p->ticks[1], p->ticks[2], p->ticks[3], p->ticks[4], p->name);
     }
     else if (p->state == UNUSED)
     {
@@ -1361,12 +1400,13 @@ void updateRuntime()
     if (p->state == RUNNING)
     {
       p->rtime += 1;
-      p->ps_rtime +=1;
+      p->ps_rtime += 1;
+      //cprintf("%d %d %d\n",ticks,p->pid,p->queue_num);
     }
     if (p->state == SLEEPING)
     {
       p->iotime += 1;
-      p->ps_iotime +=1; 
+      p->ps_iotime += 1;
     }
   }
   release(&ptable.lock);
