@@ -307,34 +307,43 @@ void scheduler(void)
 
 # Bonus :- 
   graphs :-
-          - **graph_with_cpu1** : 
-                            Graph of benchmark function with just one cpu, Command used :
-                            ```
-                            make qemu-nox SCHEDULER=MLFQ CPUS=1
-                            ```
-                Explanation :
-                            In this graph a dip of queue is seen because of the difference
-                            of last executed tick and the current ticks exceeds a particular
-                            value (which is different for every queue) and because of this
-                            the process got promoted to high priority queue and got executed
-                            imidiately after the previous process completes its allowed tick 
-                            in the queue.
-          - **graph_with_cpu2** :
-                            Graph of benchmark function with 2 cpu's, Command used :
-                            ```
-                            make qemu-nox SCHEDULER=MLFQ CPUS=2
-                            ```
-                Explanation :
-                            In this graph no promotion of processes are seen as threre are two
-                            cpu's to satisfy them hence there was less chance of being able to 
-                            cross the limit to get promoted hence smooth sailing graph.
-          - **graph_with_changed_ticks** :
-                            Graph of benchmark function with 1 cpu's, Command used :
-                            ```
-                            make qemu-nox SCHEDULER=MLFQ CPUS=1
-                            ```
-                Explanation :
-                            Here I decreased the limit on number of ticks to get promoted to higher
-                            level queue and hence because of which such an incredible behavious is
-                            seen with processes being getting allocated between queue 1, 2 & 3 
-                            instead of being only in queue 4.
+
+  **graph_with_cpu1** : 
+           
+      Graph of benchmark function with just one cpu, Command used :
+```
+      make qemu-nox SCHEDULER=MLFQ CPUS=1
+```
+           
+      Explanation :
+        In this graph a dip of queue is seen because of the difference
+        of last executed tick and the current ticks exceeds a particular
+        value (which is different for every queue) and because of this
+        the process got promoted to high priority queue and got executed
+        imidiately after the previous process completes its allowed tick 
+        in the queue.
+
+   **graph_with_cpu2** :
+
+      Graph of benchmark function with 2 cpu's, Command used :
+```
+      make qemu-nox SCHEDULER=MLFQ CPUS=2
+```
+           
+      Explanation :
+        In this graph no promotion of processes are seen as threre are two
+        cpu's to satisfy them hence there was less chance of being able to 
+        cross the limit to get promoted hence smooth sailing graph.
+
+  **graph_with_changed_ticks** :
+
+      Graph of benchmark function with 1 cpu's, Command used :
+```
+      make qemu-nox SCHEDULER=MLFQ CPUS=1
+```
+
+      Explanation :
+        Here I decreased the limit on number of ticks to get promoted to higher
+        level queue and hence because of which such an incredible behavious is
+        seen with processes being getting allocated between queue 1, 2 & 3 
+        instead of being only in queue 4.
