@@ -244,3 +244,14 @@ estimate the behaviour and effectiveness.
 
 The above two process tests shows that FCFS is the slowest and (RR 
 and PBS) are the fastest MLFQ is in midway between them
+
+
+**Ans of the question in the pdf** :-
+
+If the process yields the CPU voluntarily, then when the process becomes 
+RUNNABLE it would automatically be in the same queue (c_queue does not change)
+Or simply the
+ans is that if a process voluntarly vacates the CPU then there would be faster 
+reallocation its because it will be in the same queue and thus will have 
+higher priority and thus the reallocation would definitely be faster.
+

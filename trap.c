@@ -150,14 +150,14 @@ void trap(struct trapframe *tf)
   int allow = 0, queue_num, tcks;
   if (currp && tf->trapno == flag_val1)
   {
-    if (pass && (currp->state == RUNNING))
+    if (currp->state == RUNNING)
     {
       queue_num = currp->queue_num,
       currp->ticks[queue_num] += 1;
     }
     int queueinx_p = get_queue_inx(currp);
 
-    if (pass && (queueinx_p < allow))
+    if (queueinx_p < allow)
     {
       cprintf("%d %d\n", queueinx_p, currp->pid);
       panic("Problem in queue alloting");
@@ -165,13 +165,13 @@ void trap(struct trapframe *tf)
 
     tcks = get_ticks_func(currp);
 
-    if (pass && (currp->state == RUNNING))
+    if (currp->state == RUNNING)
     {
       flag_val2 = 1 << queueinx_p;
       // do a round robin, my time slice is over
       if (tcks)
       {
-        if (pass && (tcks >= flag_val2))
+        if (tcks >= flag_val2)
         {
           yield();
         }
@@ -179,7 +179,7 @@ void trap(struct trapframe *tf)
       else
       {
         int x = preemption_func(queueinx_p, allow);
-        if (pass && x)
+        if (x)
         {
           yield();
         }
