@@ -11,7 +11,6 @@
 - [part(b)]
 - [part(c)]
 - [Bonus]
-- [Report]
 
 # Task#1
 
@@ -339,70 +338,3 @@ void scheduler(void)
                             level queue and hence because of which such an incredible behavious is
                             seen with processes being getting allocated between queue 1, 2 & 3 
                             instead of being only in queue 4.
-
-# Report :-
-
-***All This results found with using only one cpu***
-
-*** Test function : dpro ***
-
-**for what wtime and rtime means check proc.c**
-
-# RR :- 
- Three tests :--
-    a) wtime = 1
-       rtime = 2034
-
-    b) wtime = 0
-       rtime = 2053
-
-    c) wtime = 1
-       rtime = 2022
-
-    Avg :- wtime = 0.66 ticks
-           rtime = 2036.66 ticks
-
-# FCFS :-
- Three tests :--
-    a) wtime = 1
-       rtime = 2057
-
-    b) wtime = 1
-       rtime = 2292
-
-    c) wtime = 0
-       rtime = 2237
-
-    Avg :- wtime = 0.66 ticks
-           rtime = 2195.33 ticks
-
-# PBS :- 
- Three tests :--
-    a) wtime = 1
-       rtime = 2299
-
-    b) wtime = 0
-       rtime = 2038
-
-    c) wtime = 0
-       rtime = 2103
-
-    Avg :- wtime = 0.33 ticks
-           rtime = 2146.66 ticks
-
-# MLFQ :- 
- Three tests :--
-    a) wtime = 0
-       rtime = 2053
-
-    b) wtime = 1
-       rtime = 2188
-
-    c) wtime = 0
-       rtime = 2288
-
-    Avg :- wtime = 0.3 ticks
-           rtime = 2176.33 ticks
-
-
-
