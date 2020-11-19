@@ -14,7 +14,7 @@
 
 # Task#1
 
-# Part(a) :
+## Part(a) :
 waitx function :
 
 unit of time = # of ticks
@@ -53,7 +53,7 @@ in proc.c :-
 
 ```
 
-# part(b) :-
+## part(b) :-
 
 The ps function :
 
@@ -66,7 +66,7 @@ The ps function :
 
 # Task#2 :-
 
-# Part(a) {FCFS}:-
+## Part(a) {FCFS}:-
     Logic :- looped over the queue if the function comes out to be runnable then just
              ran over it, if the process leaves the cpu then next process is executed
              For example a PC with 2 cpu cores can run only two process max at a time
@@ -111,7 +111,7 @@ for (;;)
 
 ```
 
-# Part(b) {PBS} :-
+## Part(b) {PBS} :-
     Logic :- Looped over the queue of processes to find the process with maximum 
              priority if the process with maximum priority is found then its is
              being executed, if more then one such processes with same priority 
@@ -192,7 +192,7 @@ void scheduler(void)
 }
 ```
 
-# part(c) {MLFQ} :-
+## part(c) {MLFQ} :-
     Logic :- The logic is simple loop over all the proc-stat and find the RUNNABLE 
              processes and move it to q0 ,i did this with all of the processes.On 
              running the processes I, first ran the processes present in the queue
